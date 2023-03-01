@@ -1,0 +1,245 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Aug 14 15:11:50 2018
+
+@author: nallen
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Aug  2 14:32:38 2018
+
+@author: nallen
+"""
+
+# -*- coding: utf-8 -*-
+#!/usr/bin/python2.7
+#
+# Test being run to export shelf list to collection managers
+# Email Excel Spreadhseet to manager and supervisor 
+# Use XlsxWriter to create spreadsheet from SQL Query
+# 
+#
+
+import psycopg2
+import xlsxwriter
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email.utils import formatdate
+from email import encoders
+from datetime import datetime
+
+
+
+excelfile =  'Patrontotalsbyptype.xlsx'
+
+
+
+#Set variables for email
+
+emailhost = ''
+emailport = '25'
+emailsubject = 'All patrons created last month and total number of patrons in system'
+emailmessage = '''Here are the total number of patrons created last month and the total number of patrons in the system.'''
+emailfrom = 'nallen'
+emailto = ['nallen']
+ 
+
+try:
+    conn = psycopg2.connect("dbname=iii user= host= port= password= sslmode=require")
+except psycopg2.Error as e:
+    print ("Unable to connect to database: " + str(e))
+    
+cursor = conn.cursor()
+cursor.execute(open("patroncreatedlastmonthandtotal.sql","r",).read())
+rows = cursor.fetchall()
+conn.close()
+
+
+workbook = xlsxwriter.Workbook(excelfile, {'remove_timezone': True})
+worksheet = workbook.add_worksheet()
+
+
+worksheet.set_landscape()
+worksheet.hide_gridlines(0)
+
+
+
+eformat= workbook.add_format({'text_wrap': True, 'valign': 'top' , 'num_format': 'mm/dd/yy'})
+eformatlabel= workbook.add_format({'text_wrap': False, 'valign': 'top', 'bold': True})
+
+#MAIN HOLDINGS NUMBERS
+
+worksheet.set_column(0,0,30)
+worksheet.set_column(1,1,18)
+worksheet.set_column(1,2,18)
+
+
+
+
+
+worksheet.set_header('P-typeTotals')
+
+worksheet.write(1,0,'Greenwich Adults')
+worksheet.write(2,0,'Non Resident Workers')
+worksheet.write(3,0,'My First Library Card')
+worksheet.write(4,0,'Ct-Card')
+worksheet.write(5,0,'Non-resident Fee')
+worksheet.write(6,0,'GRW YA')
+worksheet.write(7,0,'Temp Resident')
+worksheet.write(8,0,'Teacher')
+worksheet.write(9,0,'Special')
+worksheet.write(10,0,'Perrot Res A.')
+worksheet.write(11,0,'GRW Juv')
+worksheet.write(12,0,'Perrot Res. J')
+worksheet.write(13,0,'ILL')
+worksheet.write(14,0,'Reserve')
+worksheet.write(15,0,'Gold Card')
+worksheet.write(16,0,'EAN')
+worksheet.write(17,0,'Library Staff')
+worksheet.write(18,0,'Operations')
+worksheet.write(19,0,'PERILL')
+worksheet.write(20,0,'Trustee')
+worksheet.write(21,0,'Greenwich Property Owner')
+worksheet.write(22,0,'Homebound')
+worksheet.write(23,0,'GRW Summer Res')
+worksheet.write(24,0,'Non-Res Student Under 13')
+worksheet.write(25,0,'Non-Res Student 13-16')
+worksheet.write(26,0,'InfoDesk')
+worksheet.write(27,0,'Non-Res Student Over 17')
+worksheet.write(28,0,'EAN, GRW Loans')
+worksheet.write(29,0,'BYR Adult')
+worksheet.write(30,0,'BYR Juv')
+worksheet.write(31,0,'BYR YA')
+worksheet.write(32,0,'BYR My First')
+worksheet.write(33,0,'Perr Res YA')
+worksheet.write(34,0,'Per Res. Homebound')
+worksheet.write(35,0,'COS Adult')
+worksheet.write(36,0,'COS Juv')
+worksheet.write(37,0,'COS YA')
+worksheet.write(38,0,'COS My First')
+worksheet.write(39,0,'Bibliocommons Lists')
+worksheet.write(40,0,'Online Registration')
+
+worksheet.write(0,0,'P-type')
+worksheet.write(0,1,'Total')
+worksheet.write(0,2,'Created Last month')
+
+
+for rownum, col in enumerate(rows):
+ 
+    worksheet.write(rownum+1,1,col[0])
+    worksheet.write(rownum+2,1,col[1])
+    worksheet.write(rownum+3,1,col[2])
+    worksheet.write(rownum+4,1,col[3])
+    worksheet.write(rownum+5,1,col[4])
+    worksheet.write(rownum+6,1,col[5])
+    worksheet.write(rownum+7,1,col[6])
+    worksheet.write(rownum+8,1,col[7])
+    worksheet.write(rownum+9,1,col[8]) 
+    worksheet.write(rownum+10,1,col[9])
+    worksheet.write(rownum+11,1,col[10]) 
+    worksheet.write(rownum+12,1,col[11])     
+    worksheet.write(rownum+13,1,col[12])    
+    worksheet.write(rownum+14,1,col[13])
+    worksheet.write(rownum+15,1,col[14])
+    worksheet.write(rownum+16,1,col[15])
+    worksheet.write(rownum+17,1,col[16])
+    worksheet.write(rownum+18,1,col[17])
+    worksheet.write(rownum+19,1,col[18])
+    worksheet.write(rownum+20,1,col[19])
+    worksheet.write(rownum+21,1,col[20])
+    worksheet.write(rownum+22,1,col[21])
+    worksheet.write(rownum+23,1,col[22])
+    worksheet.write(rownum+24,1,col[23]) 
+    worksheet.write(rownum+25,1,col[24])     
+    worksheet.write(rownum+26,1,col[25])
+    worksheet.write(rownum+27,1,col[26]) 
+    worksheet.write(rownum+28,1,col[27]) 
+    worksheet.write(rownum+29,1,col[28])
+    worksheet.write(rownum+30,1,col[29])
+    worksheet.write(rownum+31,1,col[30])
+    worksheet.write(rownum+32,1,col[31])
+    worksheet.write(rownum+33,1,col[32])
+    worksheet.write(rownum+34,1,col[33])
+    worksheet.write(rownum+35,1,col[34])
+    worksheet.write(rownum+36,1,col[35])
+    worksheet.write(rownum+37,1,col[36])
+    worksheet.write(rownum+38,1,col[37]) 
+    worksheet.write(rownum+39,1,col[38])     
+    worksheet.write(rownum+40,1,col[39])
+    
+    worksheet.write(rownum+1,2,col[40])
+    worksheet.write(rownum+2,2,col[41])
+    worksheet.write(rownum+3,2,col[42])
+    worksheet.write(rownum+4,2,col[43])
+    worksheet.write(rownum+5,2,col[44])
+    worksheet.write(rownum+6,2,col[45])
+    worksheet.write(rownum+7,2,col[46])
+    worksheet.write(rownum+8,2,col[47])
+    worksheet.write(rownum+9,2,col[48]) 
+    worksheet.write(rownum+10,2,col[49])
+    worksheet.write(rownum+11,2,col[50]) 
+    worksheet.write(rownum+12,2,col[51])     
+    worksheet.write(rownum+13,2,col[52])    
+    worksheet.write(rownum+14,2,col[53])
+    worksheet.write(rownum+15,2,col[54])
+    worksheet.write(rownum+16,2,col[55])
+    worksheet.write(rownum+17,2,col[56])
+    worksheet.write(rownum+18,2,col[57])
+    worksheet.write(rownum+19,2,col[58])
+    worksheet.write(rownum+20,2,col[59])
+    worksheet.write(rownum+21,2,col[60])
+    worksheet.write(rownum+22,2,col[61])
+    worksheet.write(rownum+23,2,col[62])
+    worksheet.write(rownum+24,2,col[63]) 
+    worksheet.write(rownum+25,2,col[64])     
+    worksheet.write(rownum+26,2,col[65])
+    worksheet.write(rownum+27,2,col[66]) 
+    worksheet.write(rownum+28,2,col[67]) 
+    worksheet.write(rownum+29,2,col[68])
+    worksheet.write(rownum+30,2,col[69])
+    worksheet.write(rownum+31,2,col[70])
+    worksheet.write(rownum+32,2,col[71])
+    worksheet.write(rownum+33,2,col[72])
+    worksheet.write(rownum+34,2,col[73])
+    worksheet.write(rownum+35,2,col[74])
+    worksheet.write(rownum+36,2,col[75])
+    worksheet.write(rownum+37,2,col[76])
+    worksheet.write(rownum+38,2,col[77]) 
+    worksheet.write(rownum+39,2,col[78])     
+    worksheet.write(rownum+40,2,col[79])
+
+workbook.close()
+
+
+#Creating the email message
+msg = MIMEMultipart()
+msg['From'] = emailfrom
+if type(emailto) is list:
+    msg['To'] = ','.join(emailto)
+else:
+    msg['To'] = emailto
+msg['Date'] = formatdate(localtime = True)
+msg['Subject'] = emailsubject
+msg.attach (MIMEText(emailmessage))
+part = MIMEBase('application', "octet-stream")
+part.set_payload(open(excelfile,"rb").read())
+encoders.encode_base64(part)
+part.add_header('Content-Disposition','attachment; filename=%s' % excelfile)
+msg.attach(part)
+
+#Sending the email message
+smtp = smtplib.SMTP(emailhost, emailport)
+smtp.sendmail(emailfrom, emailto, msg.as_string())
+smtp.quit()
+
+
+
+
+
+
+
+
